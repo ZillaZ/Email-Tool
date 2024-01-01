@@ -1,19 +1,49 @@
-use google_gmail1::{api::{Scope, Message}, Gmail, oauth2, hyper, hyper_rustls::{self, HttpsConnector}};
+use google_gmail1::{api::{Scope, Message, MessagePartHeader, MessagePart}, Gmail, oauth2, hyper, hyper_rustls::{self, HttpsConnector}};
 use dotenvy::dotenv;
 use hyper::client::HttpConnector;
 use std::{env, collections::HashMap};
 
+pub trait EmailUtils {
+    fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> impl std::future::Future<Output = String> + Send;
+    fn get_message(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> impl std::future::Future<Output = String> + Send;
+}
+
+impl EmailUtils for Message {
+    async fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> String {
+        if self.payload.is_none() {
+            *self = get_message(hub, self.id.as_ref().unwrap()).await;
+        }
+        let headers = self.payload.clone().unwrap_or_default().headers.unwrap_or_default();
+        let subject: Vec<&MessagePartHeader> = headers.iter().filter(|x| x.name.is_some() && x.name.as_ref().unwrap().as_str() == "Subject").collect();
+        subject[0].value.clone().unwrap()
+    }
+    async fn get_message(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> String {
+        if self.payload.is_none() {
+            *self = get_message(hub, self.id.as_ref().unwrap()).await;
+        }
+        let headers = self.payload.clone().unwrap_or_default().parts.unwrap_or_default();
+        let message : Vec<&MessagePart> = headers.iter()
+        .filter(|x| x.headers.is_some() && x.headers.as_ref().unwrap().iter().map(|y| y.name.clone().unwrap()).collect::<Vec<String>>().contains(&"Content-Transfer-Encoding".to_string()))
+        .collect();
+        String::from_utf8(message[0].body.clone().unwrap().data.unwrap()).unwrap()
+    }
+}
+
 #[tokio::main]
 async fn main() {
+    let args : Vec<String> = env::args().collect();
+    let target_subject = &args[1];
     let vars = start_env();
     let hub = init_hub(&vars).await;
-    let messages = get_ids(&hub).await;
-    for message in messages.iter() {
-        let id = &message.id;
+    let mut messages = get_ids(&hub).await;
+    for message in messages.iter_mut() {
+        let id = &message.clone().id;
         if id.is_none() {
             continue;
         }
-        read_message(&hub, &id.as_ref().unwrap()).await;
+        if message.get_subject(&hub).await == *target_subject {
+            println!("Message: {}", message.get_message(&hub).await);
+        }
     }
 }
 
@@ -43,22 +73,12 @@ async fn get_ids(hub: &Gmail<HttpsConnector<HttpConnector>>) -> Vec<Message> {
     .unwrap()
 }
 
-async fn read_message(hub: &Gmail<HttpsConnector<HttpConnector>>, id: &str) {
-    let message = hub.users()
+async fn get_message(hub: &Gmail<HttpsConnector<HttpConnector>>, id: &str) -> Message {
+    hub.users()
     .messages_get("me", id)
-    .add_scope(Scope::Modify)
+     .add_scope(Scope::Modify)
     .doit()
     .await
-    .unwrap()
-    .1;
-    println!("{:?}", String::from_utf8_lossy(
-        message.
-        payload
-        .unwrap_or_default()
-        .body
-        .unwrap_or_default()
-        .data
-        .unwrap_or_default()
-        .as_slice()
-    )); 
+    .unwrap_or_default()
+    .1
 }
