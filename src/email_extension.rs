@@ -9,7 +9,7 @@ pub trait EmailExtension {
 impl EmailExtension for Message {
     async fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>, path: &str) -> Arc<String> {
         if self.payload.is_none() {
-            *self = get_message(hub, self.id.as_ref().unwrap(), path).await;
+            *self = read_message(hub, self.id.as_ref().unwrap(), path).await;
         }
         let headers = self.payload.clone().unwrap_or_default().headers.unwrap_or_default();
         let subject: Vec<&MessagePartHeader> = headers.iter().filter(|x| x.name.is_some() && x.name.as_ref().unwrap().as_str() == "Subject").collect();
@@ -17,7 +17,7 @@ impl EmailExtension for Message {
     }
     async fn get_message(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>, path: &str) -> Arc<String> {
         if self.payload.is_none() {
-            *self = get_message(hub, self.id.as_ref().unwrap(), path).await;
+            *self = read_message(hub, self.id.as_ref().unwrap(), path).await;
         }
         let headers = self.payload.clone().unwrap_or_default().parts.unwrap_or_default();
         let message : Vec<&MessagePart> = headers.iter()

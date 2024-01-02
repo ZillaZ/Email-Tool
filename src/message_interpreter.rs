@@ -35,7 +35,7 @@ pub fn init_template_vars(template: &String, beg: &str, end: &str) -> HashMap<us
     while index < template.len() && iterator.peek().is_some() {
         let mut adv_by = 1;
         let mut add_index = iterator.peek().unwrap().len_utf8();
-        if iterator.peek().unwrap() == &beg[0..1].chars().next().unwrap() {
+        if iterator.peek().unwrap() == beg.chars().peekable().peek().unwrap() {
             let text_before = template[last_end..index].to_string();
             last_end = template[index+beg.len()..].find(end).unwrap() + index + beg.len() + end.len();
             vars.insert(order, (template[index..last_end].to_string(), text_before));

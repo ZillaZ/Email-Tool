@@ -1,5 +1,4 @@
 #![feature(iter_advance_by)]
-#![feature(allocator_api)]
 
 use google_gmail1::{api::{Scope, Message, MessagePartHeader, MessagePart}, Gmail, oauth2, hyper, hyper_rustls::{self, HttpsConnector}};
 use dotenvy::dotenv;
@@ -26,7 +25,7 @@ async fn main() {
     let template_vars = init_template_vars(&template, beg, end);
     let answer_template = load_answer_template(&vars).await;
     let (hub, path) = init_hub(&vars).await;
-    let mut messages = get_ids(&hub, &path).await;
+    let mut messages = get_messages(&hub, &path).await;
 
     for message in messages.iter_mut() {
         if *message.get_subject(&hub, &path).await != *target_subject { continue; }
