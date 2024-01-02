@@ -1,2 +1,3 @@
 # Email-Tool
-Nada por aqui ainda
+
+Execute passando o assunto do email como argumento :D
