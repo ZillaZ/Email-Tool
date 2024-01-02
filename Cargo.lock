@@ -337,8 +337,6 @@ checksum = "6fb8d784f27acf97159b40fc4db5ecd8aa23b9ad5ef69cdd136d3bc80665f0c0"
 [[package]]
 name = "google-apis-common"
 version = "6.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87ee789438087de4e6aa14e8505f661d4f45b161f2d21807c1fee0d68b54732d"
 dependencies = [
  "base64 0.13.1",
  "chrono",
@@ -358,8 +356,6 @@ dependencies = [
 [[package]]
 name = "google-gmail1"
 version = "5.0.3+20230116"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36f614d84a62ccfa21dcb2c97036668b30fc7caa4404aaf6337b8c51dee45bd3"
 dependencies = [
  "anyhow",
  "google-apis-common",
