@@ -1,2 +1,0 @@
-Olá, {NAME}.
-Seu resultado é {RESULT}.
