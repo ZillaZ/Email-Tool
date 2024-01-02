@@ -2,27 +2,27 @@
 use crate::*;
 
 pub trait EmailExtension {
-    fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> impl std::future::Future<Output = String> + Send;
-    fn get_message(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> impl std::future::Future<Output = String> + Send;
+    fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>, path: &str) -> impl std::future::Future<Output = Arc<String>>;
+    fn get_message(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>, path: &str) -> impl std::future::Future<Output = Arc<String>>;
 }
 
 impl EmailExtension for Message {
-    async fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> String {
+    async fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>, path: &str) -> Arc<String> {
         if self.payload.is_none() {
-            *self = get_message(hub, self.id.as_ref().unwrap()).await;
+            *self = get_message(hub, self.id.as_ref().unwrap(), path).await;
         }
         let headers = self.payload.clone().unwrap_or_default().headers.unwrap_or_default();
         let subject: Vec<&MessagePartHeader> = headers.iter().filter(|x| x.name.is_some() && x.name.as_ref().unwrap().as_str() == "Subject").collect();
-        subject[0].value.clone().unwrap()
+        Arc::new(subject[0].value.clone().unwrap())
     }
-    async fn get_message(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> String {
+    async fn get_message(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>, path: &str) -> Arc<String> {
         if self.payload.is_none() {
-            *self = get_message(hub, self.id.as_ref().unwrap()).await;
+            *self = get_message(hub, self.id.as_ref().unwrap(), path).await;
         }
         let headers = self.payload.clone().unwrap_or_default().parts.unwrap_or_default();
         let message : Vec<&MessagePart> = headers.iter()
         .filter(|x| x.headers.is_some() && x.headers.as_ref().unwrap().iter().map(|y| y.name.clone().unwrap()).collect::<Vec<String>>().contains(&"Content-Transfer-Encoding".to_string()))
         .collect();
-        String::from_utf8(message[0].body.clone().unwrap().data.unwrap()).unwrap()
+        Arc::new(String::from_utf8(message[0].body.clone().unwrap().data.unwrap()).unwrap())
     }
 }
