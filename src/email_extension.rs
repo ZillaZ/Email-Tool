@@ -1,12 +1,12 @@
 
 use crate::*;
 
-pub trait EmailUtils {
+pub trait EmailExtension {
     fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> impl std::future::Future<Output = String> + Send;
     fn get_message(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> impl std::future::Future<Output = String> + Send;
 }
 
-impl EmailUtils for Message {
+impl EmailExtension for Message {
     async fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> String {
         if self.payload.is_none() {
             *self = get_message(hub, self.id.as_ref().unwrap()).await;

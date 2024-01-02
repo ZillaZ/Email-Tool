@@ -8,6 +8,7 @@ pub async fn load_answer_template(vars: &HashMap<String, String>) -> String {
 
 pub fn get_values(message: &String, vars: &HashMap<usize, (String, String)>) -> HashMap<String, String> {
     let mut values = HashMap::<String, String>::new();
+
     for pair in vars.iter() {
         if pair.1.0.as_str() == "END" { continue; }
         let start = message.find(&pair.1.1).unwrap() + pair.1.1.len();
@@ -24,21 +25,28 @@ pub async fn load_template(vars: &HashMap<String, String>) -> String {
     String::from_utf8(template.unwrap()).unwrap()
 }
 
-pub fn init_template_vars(template: &String, beg: char, end: char) -> HashMap<usize, (String, String)> {
+pub fn init_template_vars(template: &String, beg: &str, end: &str) -> HashMap<usize, (String, String)> {
     let mut vars = HashMap::<usize, (String, String)>::new();
     let mut last_end = 0;
     let mut index = 0;
     let mut order = 1;
-    for c in template.chars() {
-        if c == beg {
+    let mut iterator = template.chars().peekable();
+    
+    while index < template.len() && iterator.peek().is_some() {
+        let mut adv_by = 1;
+        let mut add_index = iterator.peek().unwrap().len_utf8();
+        if iterator.peek().unwrap() == &beg[0..1].chars().next().unwrap() {
             let text_before = template[last_end..index].to_string();
-            let end_index = template[index+1..].find(end).unwrap() + index + 1;
-            last_end = end_index+1;
+            last_end = template[index+beg.len()..].find(end).unwrap() + index + beg.len() + end.len();
             vars.insert(order, (template[index..last_end].to_string(), text_before));
             order += 1;
+            adv_by += beg.len() + end.len() + template[index+beg.len()..last_end].len();
+            add_index += adv_by - 1;
         }
-        index += c.len_utf8();
+        index += add_index;
+        let _ = iterator.advance_by(adv_by);
     }
+    
     vars.insert(order, ("END".to_string(), template[last_end..].to_string()));
     vars
 }
