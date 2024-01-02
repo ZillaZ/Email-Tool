@@ -1,4 +1,5 @@
 /target
 secret.json
 .env
-*.txt
+answer_template.txt
+message_template.txt
