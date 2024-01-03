@@ -1,6 +1,6 @@
 # Email-Tool
 
-[![BUILD_STATUS](https://github.com/ZillaZ/Email-Tool/workflows/Rust%20CI/badge.svg)](https://github.com/ZillaZ/Email-Tool/actions)
+[![BUILD_STATUS](https://github.com/ZillaZ/Email-Tool/workflows/Rust/badge.svg)](https://github.com/ZillaZ/Email-Tool/actions)
 
 This program requires a Google OAuth client to run. Additionally, your `.env` file needs to contain the following variables:
 
