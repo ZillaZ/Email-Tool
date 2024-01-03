@@ -1,5 +1,11 @@
 use crate::{*, email_extension::EmailExtension};
 
+pub fn skip(iter: &mut impl Iterator<Item = char>, x: usize) {
+    for _ in 0..x {
+        iter.next();
+    }
+}
+
 pub async fn process_messages(hub: &Gmail<HttpsConnector<HttpConnector>>, vars: &HashMap<String, String>) {
     let args = get_args();
     let template = load_template(&vars).await;
@@ -67,7 +73,7 @@ pub fn init_template_vars(template: &String, beg: &str, end: &str) -> HashMap<us
             add_index += adv_by - 1;
         }
         index += add_index;
-        let _ = iterator.advance_by(adv_by);
+        skip(&mut iterator, adv_by);
     }
     
     vars.insert(order, ("END".to_string(), template[last_end..].to_string()));

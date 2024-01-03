@@ -17,11 +17,5 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: nightly-2023-11-24 # Specify the desired nightly version
-
     - name: Build
       run: cargo build --verbose
