@@ -1,7 +1,7 @@
 # Email-Tool
 
-[![Ubuntu](https://github.com/ZillaZ/Email-Tool/workflows/Ubuntu/badge.svg)](https://github.com/ZillaZ/Email-Tool/actions)
-[![Windows](https://github.com/ZillaZ/Email-Tool/workflows/Windows/badge.svg)](https://github.com/ZillaZ/Email-Tool/actions)
+[![Ubuntu](https://github.com/ZillaZ/Email-Tool/workflows/Ubuntu/badge.svg)](https://github.com/ZillaZ/Email-Tool/actions/workflows/ubuntu.yml)
+[![Windows](https://github.com/ZillaZ/Email-Tool/workflows/Windows/badge.svg)](https://github.com/ZillaZ/Email-Tool/actions/workflows/windows.yml)
 
 This program requires a Google OAuth client to run. Additionally, your `.env` file needs to contain the following variables:
 
