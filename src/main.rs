@@ -16,33 +16,25 @@ pub mod hub_extension;
 
 #[tokio::main]
 async fn main() {
-    let args : Vec<String> = env::args().collect();
-    let target_subject = &args[1];
     let vars = start_env();
-    let template = load_template(&vars).await;
-    let beg = &vars["BEG"];
-    let end = &vars["END"];
-    let template_vars = init_template_vars(&template, beg, end);
-    let answer_template = load_answer_template(&vars).await;
-    let (hub, path) = init_hub(&vars).await;
-    let mut messages = get_messages(&hub, &path).await;
-
-    for message in messages.iter_mut() {
-        if *message.get_subject(&hub, &path).await != *target_subject { continue; }
-
-        let message = message.get_message(&hub, &path).await;
-        let vals = get_values(&message, &template_vars);
-        let mut answer = answer_template.clone();
-
-        for pair in vals.iter() {
-            answer = answer.replace(pair.0, pair.1);
-        }
-
-        println!("Final Message: {}", answer);
-    }
+    let (hub, path) = init_hub(&vars).await; 
+    process_messages(&hub, &path, &vars).await;
 }
 
 fn start_env() -> HashMap<String, String> {
-    let _ = dotenv().expect("bruh.");
+    let _ = dotenv().expect("Error while initializing .env");
     env::vars().collect::<HashMap<String, String>>()
+}
+
+fn get_args() -> HashMap<String, String> {
+    let args : Vec<String> = env::args().collect();
+    let mut args_map = HashMap::<String, String>::new();
+    if args.len() < 3 { panic!("Not enough arguments for execution."); }
+    for i in (1..args.len()).filter(|x| x % 2 != 0) {
+        let arg = args[i].to_owned();
+        let value = args[i+1].to_owned();
+        args_map.insert(arg, value);
+    }
+    if !args_map.contains_key("-s") { panic!("Missing argument: -s"); }
+    args_map
 }

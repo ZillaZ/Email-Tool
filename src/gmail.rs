@@ -2,6 +2,7 @@ use google_gmail1::{Error, api::ListMessagesResponse};
 
 use crate::{*, hub_extension::HubExtension};
 
+
 pub async fn init_hub(vars: &HashMap<String, String>) -> (Gmail<HttpsConnector<HttpConnector>>, String) {
     let secret = oauth2::read_application_secret(&vars["SECRET_PATH"]).await.unwrap();
     let auth = oauth2::InstalledFlowAuthenticator::builder(
@@ -44,7 +45,7 @@ pub async fn read_message(hub: &Gmail<HttpsConnector<HttpConnector>>, id: &str, 
     }
 }
     
-    async fn get_message(hub: &Gmail<HttpsConnector<HttpConnector>>, id: &str, path: &str) -> Result<(hyper::Response<hyper::Body>, Message), Error> {
+async fn get_message(hub: &Gmail<HttpsConnector<HttpConnector>>, id: &str, path: &str) -> Result<(hyper::Response<hyper::Body>, Message), Error> {
     let mut calee = hub.users().messages_get("me", id);
     calee.add_scope(Scope::Modify);
     let token = match calee.get_saved_token(path).await {

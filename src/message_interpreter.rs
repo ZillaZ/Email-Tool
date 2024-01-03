@@ -1,5 +1,28 @@
 use crate::*;
 
+pub async fn process_messages(hub: &Gmail<HttpsConnector<HttpConnector>>, path: &str, vars: &HashMap<String, String>) {
+    let args = get_args();
+    let template = load_template(&vars).await;
+    let template_vars = init_template_vars(&template, &vars["BEG"], &vars["END"]);
+    let answer_template = load_answer_template(&vars).await;
+    
+    let mut messages = get_messages(&hub, &path).await;
+
+    for message in messages.iter_mut() {
+        if *message.get_subject(&hub, &path).await != args["-s"] { continue; }
+        
+        let message = message.get_message(&hub, &path).await;
+        let vals = get_values(&message, &template_vars);
+        let mut answer = answer_template.clone();
+
+        for pair in vals.iter() {
+            answer = answer.replace(pair.0, pair.1);
+        }
+        
+        println!("Final Message: {}", answer);
+    }
+}
+
 pub async fn load_answer_template(vars: &HashMap<String, String>) -> String {
     let answer_template_path = &vars["ANSWER_TEMPLATE_PATH"];
     let answer_template = tokio::fs::read(answer_template_path).await.unwrap();
