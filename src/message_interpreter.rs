@@ -44,7 +44,7 @@ pub fn get_values(message: &String, vars: &HashMap<usize, (String, String)>) -> 
         let end = message[start+1..].find(&vars.get(&(pair.0+1)).unwrap().1).unwrap() + start;
         values.insert(pair.1.0.clone(), message[start..end+1].to_string());
     }
-    
+
     values
 }
 
@@ -59,23 +59,21 @@ pub fn init_template_vars(template: &String, beg: &str, end: &str) -> HashMap<us
     let mut last_end = 0;
     let mut index = 0;
     let mut order = 1;
-    let mut iterator = template.chars().peekable();
     
-    while index < template.len() && iterator.peek().is_some() {
-        let mut adv_by = 1;
-        let mut add_index = iterator.peek().unwrap().len_utf8();
-        if iterator.peek().unwrap() == beg.chars().peekable().peek().unwrap() {
-            let text_before = template[last_end..index].to_string();
-            last_end = template[index+beg.len()..].find(end).unwrap() + index + beg.len() + end.len();
-            vars.insert(order, (template[index..last_end].to_string(), text_before));
+    while let Some(start_idx) = template[index..].find(beg) {
+        let start = index + start_idx;
+        let end_idx = template[start + beg.len()..].find(end);
+        if let Some(e) = end_idx {
+            let end = start + beg.len() + e + end.len();
+            let text_before = template[last_end..start].to_string();
+            vars.insert(order, (template[start..end].to_string(), text_before));
             order += 1;
-            adv_by += beg.len() + end.len() + template[index+beg.len()..last_end].len();
-            add_index += adv_by - 1;
+            last_end = end;
+            index = end;
+        } else {
+            break;
         }
-        index += add_index;
-        skip(&mut iterator, adv_by);
     }
-    
     vars.insert(order, ("END".to_string(), template[last_end..].to_string()));
     vars
 }
