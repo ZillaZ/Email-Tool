@@ -5,7 +5,6 @@ This program requires a Google OAuth client to run. Additionally, your `.env` fi
 - `SECRET_PATH`: Path to your `secret.json` (OAuth)
 - `TEMPLATE_PATH`: Path to the message template
 - `ANSWER_TEMPLATE_PATH`: Path to the response template
-- `SAVED_TOKENS_PATH`: Path where your tokens will be persisted
 - `BEG`: Initial separator
 - `END`: Final separator
 
