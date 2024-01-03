@@ -6,19 +6,17 @@ use hyper::client::HttpConnector;
 use message_interpreter::*;
 use std::{env, collections::HashMap};
 use gmail::*;
-use email_extension::*;
 use std::sync::Arc;
 
 pub mod email_extension;
 pub mod message_interpreter;
 pub mod gmail;
-pub mod hub_extension;
 
 #[tokio::main]
 async fn main() {
     let vars = start_env();
-    let (hub, path) = init_hub(&vars).await; 
-    process_messages(&hub, &path, &vars).await;
+    let hub = init_hub(&vars).await; 
+    process_messages(&hub, &vars).await;
 }
 
 fn start_env() -> HashMap<String, String> {

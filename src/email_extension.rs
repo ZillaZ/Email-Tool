@@ -2,22 +2,22 @@
 use crate::*;
 
 pub trait EmailExtension {
-    fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>, path: &str) -> impl std::future::Future<Output = Arc<String>>;
-    fn get_message(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>, path: &str) -> impl std::future::Future<Output = Arc<String>>;
+    fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> impl std::future::Future<Output = Arc<String>>;
+    fn get_message(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> impl std::future::Future<Output = Arc<String>>;
 }
 
 impl EmailExtension for Message {
-    async fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>, path: &str) -> Arc<String> {
+    async fn get_subject(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> Arc<String> {
         if self.payload.is_none() {
-            *self = read_message(hub, self.id.as_ref().unwrap(), path).await;
+            *self = get_message(hub, self.id.as_ref().unwrap()).await;
         }
         let headers = self.payload.clone().unwrap_or_default().headers.unwrap_or_default();
         let subject: Vec<&MessagePartHeader> = headers.iter().filter(|x| x.name.is_some() && x.name.as_ref().unwrap().as_str() == "Subject").collect();
         Arc::new(subject[0].value.clone().unwrap())
     }
-    async fn get_message(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>, path: &str) -> Arc<String> {
+    async fn get_message(&mut self, hub: &Gmail<HttpsConnector<HttpConnector>>) -> Arc<String> {
         if self.payload.is_none() {
-            *self = read_message(hub, self.id.as_ref().unwrap(), path).await;
+            *self = get_message(hub, self.id.as_ref().unwrap()).await;
         }
         let headers = self.payload.clone().unwrap_or_default().parts.unwrap_or_default();
         let message : Vec<&MessagePart> = headers.iter()

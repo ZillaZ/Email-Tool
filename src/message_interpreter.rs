@@ -1,17 +1,17 @@
-use crate::*;
+use crate::{*, email_extension::EmailExtension};
 
-pub async fn process_messages(hub: &Gmail<HttpsConnector<HttpConnector>>, path: &str, vars: &HashMap<String, String>) {
+pub async fn process_messages(hub: &Gmail<HttpsConnector<HttpConnector>>, vars: &HashMap<String, String>) {
     let args = get_args();
     let template = load_template(&vars).await;
     let template_vars = init_template_vars(&template, &vars["BEG"], &vars["END"]);
     let answer_template = load_answer_template(&vars).await;
     
-    let mut messages = get_messages(&hub, &path).await;
+    let mut ids = get_ids(&hub).await;
 
-    for message in messages.iter_mut() {
-        if *message.get_subject(&hub, &path).await != args["-s"] { continue; }
+    for message in ids.iter_mut() {
+        if *message.get_subject(&hub).await != args["-s"] { continue; }
         
-        let message = message.get_message(&hub, &path).await;
+        let message = message.get_message(&hub).await;
         let vals = get_values(&message, &template_vars);
         let mut answer = answer_template.clone();
 

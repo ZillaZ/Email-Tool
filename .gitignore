@@ -1,4 +1,4 @@
 /target
-secret.json
+*.json
 .env
 *.txt
