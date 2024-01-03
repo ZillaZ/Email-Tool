@@ -15,4 +15,9 @@ Variables in your templates need to be enclosed between `BEG` and `END`. For exa
 `Your variable is {VARIABLE}`
 
 Finally, you can execute the program by passing the email subject you wish to process as an argument. For example:
-`cargo run "Email Test"`
+```bash
+cargo run -- -s "Email Test"
+```
+You can use flags to identify different arguments.
+- `-s "Subject": Identifies the email subject.`
+- `-w true: The program will write the message on your template path.`

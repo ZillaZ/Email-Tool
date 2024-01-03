@@ -1,9 +1,8 @@
 use crate::{*, email_extension::EmailExtension};
 
-pub fn skip(iter: &mut impl Iterator<Item = char>, x: usize) {
-    for _ in 0..x {
-        iter.next();
-    }
+async fn write_message_for_template(message: &Arc<String>, path: &str) {
+    println!("written");
+    tokio::fs::write(path, message.as_bytes()).await.unwrap();
 }
 
 pub async fn process_messages(hub: &Gmail<HttpsConnector<HttpConnector>>, vars: &HashMap<String, String>) {
@@ -13,14 +12,23 @@ pub async fn process_messages(hub: &Gmail<HttpsConnector<HttpConnector>>, vars: 
     let answer_template = load_answer_template(&vars).await;
     
     let mut ids = get_ids(&hub).await;
+    let mut messages = Vec::<Arc<String>>::new();
 
     for message in ids.iter_mut() {
         if *message.get_subject(&hub).await != args["-s"] { continue; }
-        
         let message = message.get_message(&hub).await;
+        messages.push(message);
+    }
+    if args.contains_key("-w") {
+        write_message_for_template(&messages[0], &vars["TEMPLATE_PATH"]).await;
+        println!("Edit your template adding your variables, then execute the program without the -w flag.");
+        return
+    }
+    
+    for message in messages {
         let vals = get_values(&message, &template_vars);
         let mut answer = answer_template.clone();
-
+    
         for pair in vals.iter() {
             answer = answer.replace(pair.0, pair.1);
         }
@@ -37,7 +45,7 @@ pub async fn load_answer_template(vars: &HashMap<String, String>) -> String {
 
 pub fn get_values(message: &String, vars: &HashMap<usize, (String, String)>) -> HashMap<String, String> {
     let mut values = HashMap::<String, String>::new();
-
+    
     for pair in vars.iter() {
         if pair.1.0.as_str() == "END" { continue; }
         let start = message.find(&pair.1.1).unwrap() + pair.1.1.len();
