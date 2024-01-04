@@ -1,8 +1,8 @@
 use crate::{*, email_extension::EmailExtension};
 
 async fn write_message_for_template(message: &Arc<String>, path: &str) {
-    println!("written");
     tokio::fs::write(path, message.as_bytes()).await.unwrap();
+    println!("written");
 }
 
 pub async fn process_messages(hub: &Gmail<HttpsConnector<HttpConnector>>, vars: &HashMap<String, String>) {
